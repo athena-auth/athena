@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  athena-db:
+    image: postgres:alpine
+    restart: always
+    environment:
+      - POSTGRES_DB=athena
+      - POSTGRES_USER=athena
+      - POSTGRES_PASSWORD=athena
+    ports:
+      - "5432:5432"
+    volumes:
+      - athena-db:/var/lib/postgresql/data
+
+volumes:
+  athena-db:
