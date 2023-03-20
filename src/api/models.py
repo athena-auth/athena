@@ -15,4 +15,4 @@ class User(Model):
 
     @property
     def is_authenticated(self):
-        return False
+        return True
