@@ -161,4 +161,5 @@ out/
 __pycache__
 media
 
-
+# Env files
+.env.**
