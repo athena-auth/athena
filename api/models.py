@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
+from api.security import hash_client_secret
+
 
 class Provider(models.Model):
     name = models.CharField(null=False, max_length=255)
@@ -9,7 +11,7 @@ class Provider(models.Model):
     code_endpoint = models.CharField(null=False, max_length=255)
     token_endpoint = models.CharField(null=False, max_length=255)
     resource_endpoint = models.CharField(null=False, max_length=255)
- 
+
     client_id = models.CharField(null=False, max_length=255)
     client_secret = models.CharField(null=False, max_length=255)
     public_key = models.CharField(null=False, max_length=255)
@@ -20,5 +22,12 @@ class Provider(models.Model):
 
     class Meta:
         db_table = "provider"
-        constraints = [models.UniqueConstraint(fields=["client_id"], name="provider_client_id_unique_index")]
+        constraints = [models.UniqueConstraint(fields=["name"], name="provider_name_unique_index"),
+                       models.UniqueConstraint(fields=["client_id"], name="provider_client_id_unique_index")]
         indexes = [models.Index(fields=["name"]), models.Index(fields=["client_id"]), models.Index(fields=["disabled"])]
+
+    def save(self, *args, **kwargs):
+        self.client_secret = hash_client_secret(self.client_secret)
+        super().save(*args, **kwargs)
+
+
