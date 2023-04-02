@@ -7,12 +7,7 @@ from api.serializers import ProviderSerializer
 
 class ProviderController:
 
-    def get_providers(self):
-        providers = Provider.objects.all()
-        serializer = ProviderSerializer(providers, many=True)
-        return serializer
-
-    def get_provider(self, key):
+    def find_provider_by_key(self, key):
         provider = None
         try:
             provider = Provider.objects.get(pk=key)
@@ -21,6 +16,16 @@ class ProviderController:
 
         if provider is None:
             raise NotFound
+
+        return provider
+
+    def get_providers(self):
+        providers = Provider.objects.all()
+        serializer = ProviderSerializer(providers, many=True)
+        return serializer
+
+    def get_provider(self, key):
+        provider = self.find_provider_by_key(key)
 
         serializer = ProviderSerializer(provider)
         return serializer
@@ -33,4 +38,16 @@ class ProviderController:
             return serializer
         else:
             raise BadRequest
+
+    def update_provider(self, key, request):
+        provider = self.find_provider_by_key(key)
+
+        serializer = ProviderSerializer(provider, request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return serializer
+        else:
+            raise BadRequest
+
 

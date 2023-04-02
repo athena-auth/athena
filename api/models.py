@@ -29,3 +29,4 @@ class Provider(models.Model):
         self.client_secret = hash_client_secret(self.client_secret)
         super().save(*args, **kwargs)
 
+
