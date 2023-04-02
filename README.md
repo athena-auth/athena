@@ -18,7 +18,7 @@ You can deploy **athena** on a VPS (e.g. DigitalOcean) or run it locally for tes
 ## Table of Contents
 
 - [Features](#features)
-- [Endpoints](#endpoints)
+- [API](#api)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Deployment](#deployment)
@@ -29,7 +29,7 @@ You can deploy **athena** on a VPS (e.g. DigitalOcean) or run it locally for tes
 
 ## Features
 
-## Endpoints
+## API
 
 ## Installation
 
