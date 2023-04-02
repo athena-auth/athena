@@ -50,4 +50,8 @@ class ProviderController:
         else:
             raise BadRequest
 
+    def delete_provider(self, key):
+        provider = self.find_provider_by_key(key=key)
+        provider.delete()
+
 

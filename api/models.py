@@ -22,7 +22,8 @@ class Provider(models.Model):
 
     class Meta:
         db_table = "provider"
-        constraints = [models.UniqueConstraint(fields=["client_id"], name="provider_client_id_unique_index")]
+        constraints = [models.UniqueConstraint(fields=["name"], name="provider_name_unique_index"),
+                       models.UniqueConstraint(fields=["client_id"], name="provider_client_id_unique_index")]
         indexes = [models.Index(fields=["name"]), models.Index(fields=["client_id"]), models.Index(fields=["disabled"])]
 
     def save(self, *args, **kwargs):

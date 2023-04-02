@@ -36,3 +36,11 @@ class ProviderView(APIView):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except BadRequest:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, key):
+        try:
+            self.controller.delete_provider(key=key)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except BadRequest:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
