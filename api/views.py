@@ -18,4 +18,5 @@ class ProviderView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=201)
-        return Response({"message": "OK"})
+        else:
+            return Response(status=400)

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from api.models import Provider
+from api.security import hash_client_secret
 
 
 class ProviderSerializer(serializers.Serializer):
@@ -22,6 +23,8 @@ class ProviderSerializer(serializers.Serializer):
     disabled = serializers.BooleanField(allow_null=False)
 
     def create(self, validated_data):
+        validated_data["client_secret"] = hash_client_secret(validated_data["client_secret"])
+
         return Provider.objects.create(**validated_data)
 
 
