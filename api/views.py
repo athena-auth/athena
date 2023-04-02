@@ -1,22 +1,34 @@
+from django.core.exceptions import BadRequest
+from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from api.serializers import ProviderSerializer
+from rest_framework import status
+from api.controllers import ProviderController
 
 
 class ProvidersView(APIView):
+    def __init__(self):
+        self.controller = ProviderController()
+
     def get(self, request):
-        return Response({"message": "Get all!"})
+        serializer = self.controller.get_providers()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ProviderView(APIView):
+    def __init__(self):
+        self.controller = ProviderController()
+
     def get(self, request, key):
-        return Response({"message": f"Get one {key}"})
+        try:
+            serializer = self.controller.get_provider(key=key)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except NotFound:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request):
-        serializer = ProviderSerializer(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        else:
-            return Response(status=400)
+        try:
+            serializer = self.controller.create_provider(request=request)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except BadRequest:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
