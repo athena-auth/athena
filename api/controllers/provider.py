@@ -1,17 +1,30 @@
 from django.core.exceptions import BadRequest
 from rest_framework.exceptions import NotFound
-
 from api.models import Provider
-from api.serializers import ProviderSerializer
+from api.serializers.provider import ProviderSerializer
 
 
 class ProviderController:
 
-    def find_provider_by_key(self, key):
+    def find_by_key(self, key):
         provider = None
         try:
             provider = Provider.objects.get(pk=key)
         except Provider.DoesNotExist:
+            pass
+
+        if provider is None:
+            raise NotFound
+
+        return provider
+
+    def find_by_name(self, name):
+        provider = None
+        try:
+            provider = Provider.objects.get(name__iexact=name)
+        except Provider.DoesNotExist:
+            pass
+        except Provider.MultipleObjectsReturned:
             pass
 
         if provider is None:
@@ -25,7 +38,7 @@ class ProviderController:
         return serializer
 
     def get_provider(self, key):
-        provider = self.find_provider_by_key(key)
+        provider = self.find_by_key(key)
 
         serializer = ProviderSerializer(provider)
         return serializer
@@ -40,7 +53,7 @@ class ProviderController:
             raise BadRequest
 
     def update_provider(self, key, request):
-        provider = self.find_provider_by_key(key)
+        provider = self.find_by_key(key)
 
         serializer = ProviderSerializer(provider, request.data, partial=True)
 
@@ -51,7 +64,5 @@ class ProviderController:
             raise BadRequest
 
     def delete_provider(self, key):
-        provider = self.find_provider_by_key(key=key)
+        provider = self.find_by_key(key=key)
         provider.delete()
-
-
