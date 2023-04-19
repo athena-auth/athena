@@ -18,10 +18,10 @@ class ProviderController:
 
         return provider
 
-    def find_by_name(self, name):
+    def find_by_client_id(self, client_id):
         provider = None
         try:
-            provider = Provider.objects.get(name__iexact=name)
+            provider = Provider.objects.get(client_id=client_id)
         except Provider.DoesNotExist:
             pass
         except Provider.MultipleObjectsReturned:
