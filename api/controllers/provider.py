@@ -18,19 +18,19 @@ class ProviderController:
 
         return provider
 
-    def find_by_client_id(self, client_id):
-        provider = None
-        try:
-            provider = Provider.objects.get(client_id=client_id)
-        except Provider.DoesNotExist:
-            pass
-        except Provider.MultipleObjectsReturned:
-            pass
-
-        if provider is None:
-            raise NotFound
-
-        return provider
+    # def find_by_client_id(self, client_id):
+    #     provider = None
+    #     try:
+    #         provider = Provider.objects.get(client_id=client_id)
+    #     except Provider.DoesNotExist:
+    #         pass
+    #     except Provider.MultipleObjectsReturned:
+    #         pass
+    #
+    #     if provider is None:
+    #         raise NotFound
+    #
+    #     return provider
 
     def get_providers(self):
         providers = Provider.objects.all()

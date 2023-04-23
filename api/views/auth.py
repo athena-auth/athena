@@ -11,13 +11,14 @@ class OAuth2View(APIView):
         super().__init__(**kwargs)
         self.controller = OAuth2Controller()
 
-    def get(self, request, client_id):
-        try:
-            scopes = request.query_params.get(SCOPES_PARAM)
-            redirect_uri = request.query_params.get(REDIRECT_URI_PARAM)
-            state = request.query_params.get(STATE_PARAM)
-
-            self.controller.get_auth_code(client_id, scopes, redirect_uri, state)
-            return Response({"provider": client_id}, status=HTTP_200_OK)
-        except BadRequest:
-            return Response(status=HTTP_400_BAD_REQUEST)
+    # def get(self, request, client_id):
+    #     try:
+    #         scopes = request.query_params.get(SCOPES_PARAM)
+    #         redirect_uri = request.query_params.get(REDIRECT_URI_PARAM)
+    #         state = request.query_params.get(STATE_PARAM)
+    #
+    #         auth_url = self.controller.get_auth_url(client_id, scopes, redirect_uri, state)
+    #
+    #         return Response({"auth_url": auth_url}, status=HTTP_200_OK)
+    #     except BadRequest:
+    #         return Response(status=HTTP_400_BAD_REQUEST)
