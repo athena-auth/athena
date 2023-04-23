@@ -19,7 +19,7 @@ class Endpoint(Model):
         POST = "POST"
         DELETE = "DELETE"
 
-    provider = ForeignKey(Provider, on_delete=CASCADE, null=False, related_name="endpoints")
+    provider = ForeignKey(Provider, on_delete=CASCADE, related_name="endpoints")
     type = CharField(null=False, blank=False, choices=EndpointType.choices, max_length=255)
     http_method = CharField(null=False, blank=False, choices=EndpointHttpMethod.choices, max_length=255)
     base_url = CharField(null=False, blank=False, max_length=255)

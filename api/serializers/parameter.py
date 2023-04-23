@@ -1,9 +1,11 @@
+from rest_framework.fields import IntegerField
 from rest_framework.serializers import ModelSerializer
-
 from api.models import Parameter
 
 
 class ParameterSerializer(ModelSerializer):
+    id = IntegerField(read_only=True)
+
     class Meta:
         model = Parameter
-        fields = '__all__'
+        fields = ["id", "name", "value"]

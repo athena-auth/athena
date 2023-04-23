@@ -45,10 +45,12 @@ class ProviderController:
 
     def create_provider(self, request):
         serializer = ProviderSerializer(data=request.data)
-
         if serializer.is_valid():
-            serializer.save()
-            return serializer
+            try:
+                serializer.save()
+                return serializer
+            except BadRequest:
+                raise BadRequest
         else:
             raise BadRequest
 

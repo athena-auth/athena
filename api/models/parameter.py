@@ -10,7 +10,7 @@ from api.models import Endpoint
 class Parameter(Model):
     name = CharField(null=False, max_length=255)
     value = CharField(null=False, max_length=255)
-    endpoint = ForeignKey(Endpoint, on_delete=CASCADE, null=False, related_name="parameters")
+    endpoint = ForeignKey(Endpoint, on_delete=CASCADE, related_name="parameters")
 
     class Meta:
         db_table = "parameter"
