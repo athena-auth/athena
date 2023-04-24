@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 from api.controllers.auth import OAuth2Controller
-from api.utils.constants import STATE_PARAM, REDIRECT_URI_PARAM, SCOPES_PARAM
 
 
 class OAuth2View(APIView):

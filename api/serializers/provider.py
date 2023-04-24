@@ -1,7 +1,5 @@
 from django.core.exceptions import BadRequest
 from rest_framework.serializers import ModelSerializer
-
-from api.models import Endpoint, Parameter
 from api.models.provider import Provider
 from api.serializers.endpoint import EndpointSerializer
 
@@ -14,22 +12,21 @@ class ProviderSerializer(ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        endpoints = validated_data.pop("endpoints")
+        provider = Provider.objects.create(name=validated_data["name"],
+                                           description=validated_data["description"],
+                                           disabled=False)
 
-        provider = Provider(**validated_data)
-        provider.save()
+        endpoint_data = validated_data["endpoints"]
+        if endpoint_data is None or len(endpoint_data) == 0:
+            raise BadRequest
 
-        for e in endpoints:
-            parameters = e.pop("parameters")
-
-            if parameters is None or len(parameters) == 0:
+        for endpoint in endpoint_data:
+            endpoint_serializer = EndpointSerializer(data=endpoint)
+            if endpoint_serializer.is_valid():
+                endpoint_serializer.save(provider=provider)
+            else:
                 raise BadRequest
 
-            endpoint = Endpoint(**e, provider=provider)
-            endpoint.save()
-
-            for p in parameters:
-                parameter = Parameter(**p, endpoint=endpoint)
-                parameter.save()
-
         return provider
+
+
