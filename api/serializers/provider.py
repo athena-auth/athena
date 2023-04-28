@@ -15,7 +15,8 @@ class ProviderSerializer(ModelSerializer):
 
     def create(self, validated_data):
         provider = Provider.objects.create(name=validated_data["name"],
-                                           description=validated_data["description"],
+                                           description=validated_data["description"]
+                                           if "description" in validated_data else None,
                                            disabled=False)
 
         endpoint_data = validated_data["endpoints"]
