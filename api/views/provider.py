@@ -39,7 +39,7 @@ class ProviderView(APIView):
         else:
             try:
                 serializer = self.controller.create_provider(request=request)
-                return Response({"message": "YOLO"}, status=HTTP_201_CREATED)
+                return Response(serializer.data, status=HTTP_201_CREATED)
             except BadRequest:
                 return Response(status=HTTP_400_BAD_REQUEST)
 
