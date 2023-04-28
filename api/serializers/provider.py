@@ -32,31 +32,44 @@ class ProviderSerializer(ModelSerializer):
         return provider
 
     def update(self, instance, validated_data):
-        endpoint_data = validated_data.pop("endpoints")
+        endpoint_data = None
 
-        provider = super().update(instance, validated_data)
+        if "endpoints" in validated_data:
+            endpoint_data = validated_data.pop("endpoints")
 
-        if endpoint_data is None or len(endpoint_data) == 0:
+        provider = super().update(instance=instance, validated_data=validated_data)
+
+        if endpoint_data is not None and len(endpoint_data) == 0:
             raise BadRequest
 
-        for endpoint in endpoint_data:
-            if endpoint["id"] is None:
-                endpoint_serializer = EndpointSerializer(data=endpoint)
+        if endpoint_data is not None:
+            created_or_updated_endpoint_ids = []
 
-                if endpoint_serializer.is_valid():
-                    endpoint_serializer.save(provider=provider)
-                else:
-                    raise BadRequest
-            else:
-                try:
-                    found_endpoint = Endpoint.objects.get(pk=endpoint["id"])
-                    endpoint_serializer = EndpointSerializer(found_endpoint, data=endpoint, partial=True)
+            for endpoint in endpoint_data:
+                if endpoint["id"] is None:
+                    endpoint_serializer = EndpointSerializer(data=endpoint)
 
                     if endpoint_serializer.is_valid():
-                        endpoint_serializer.save()
+                        endpoint_serializer.save(provider=provider)
+                        created_or_updated_endpoint_ids.append(endpoint_serializer.data.get("id"))
                     else:
                         raise BadRequest
-                except Endpoint.DoesNotExist:
-                    raise BadRequest
+                else:
+                    try:
+                        found_endpoint = Endpoint.objects.get(pk=endpoint["id"])
+                        endpoint_serializer = EndpointSerializer(found_endpoint, data=endpoint, partial=True)
+
+                        if endpoint_serializer.is_valid():
+                            endpoint_serializer.save()
+                            created_or_updated_endpoint_ids.append(endpoint_serializer.data.get("id"))
+                        else:
+                            raise BadRequest
+                    except Endpoint.DoesNotExist:
+                        raise BadRequest
+
+            current_endpoints = [endpoint for endpoint in instance.endpoints.all()]
+            for current_endpoint in current_endpoints:
+                if current_endpoint.id not in created_or_updated_endpoint_ids:
+                    current_endpoint.delete()
 
         return provider
