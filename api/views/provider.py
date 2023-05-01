@@ -32,16 +32,18 @@ class ProviderView(APIView):
         except NotFound:
             return Response(status=HTTP_404_NOT_FOUND)
 
-    def post(self, request, key=None):
-        if key is not None:
-            serializer = self.controller.update_provider(key=key, request=request)
-            return Response(serializer.data, status=HTTP_200_OK)
+    def post(self, request, client_id=None):
+        provider = None
+        if client_id is None:
+            provider = self.controller.create_provider(request=request)
         else:
-            try:
-                serializer = self.controller.create_provider(request=request)
-                return Response(serializer.data, status=HTTP_201_CREATED)
-            except BadRequest:
-                return Response(status=HTTP_400_BAD_REQUEST)
+            provider = self.controller.update_provider(client_id=client_id, request=request)
+
+        if provider is None or provider.data is None:
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        return Response(provider.data, status=HTTP_200_OK)
+
 
     def delete(self, request, key):
         try:

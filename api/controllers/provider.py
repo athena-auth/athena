@@ -1,10 +1,21 @@
-from django.core.exceptions import BadRequest
 from rest_framework.exceptions import NotFound
 from api.models import Provider
 from api.serializers.provider import ProviderSerializer
 
 
 class ProviderController:
+
+    def find_by_client_id(self, client_id):
+        if client_id is None:
+            return None
+
+        provider = None
+        try:
+            provider = Provider.objects.get(client_id=client_id)
+        except Provider.DoesNotExist:
+            return None
+
+        return provider
 
     def find_by_key(self, key):
         provider = None
@@ -30,26 +41,30 @@ class ProviderController:
         return serializer
 
     def create_provider(self, request):
-        serializer = ProviderSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                serializer.save()
-                return serializer
-            except BadRequest:
-                raise BadRequest
-        else:
-            raise BadRequest
+        if request is None or request.data is None:
+            return None
 
-    def update_provider(self, key, request):
-        provider = self.find_by_key(key)
+        provider_serializer = ProviderSerializer(data=request.data)
+        if not provider_serializer.is_valid():
+            return None
 
-        serializer = ProviderSerializer(provider, request.data, partial=True)
+        provider_serializer.save()
 
-        if serializer.is_valid():
-            serializer.save()
-            return serializer
-        else:
-            raise BadRequest
+        return provider_serializer
+
+    def update_provider(self, client_id, request):
+        provider = self.find_by_client_id(client_id)
+
+        if provider is None:
+            return None
+
+        provider_serializer = ProviderSerializer(instance=provider, data=request.data, partial=True)
+        if not provider_serializer.is_valid():
+            return None
+
+        provider_serializer.save()
+
+        return provider_serializer
 
     def delete_provider(self, key):
         provider = self.find_by_key(key=key)

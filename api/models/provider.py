@@ -16,7 +16,6 @@ class Provider(Model):
 
     public_key = CharField(null=True, blank=False, max_length=255)
 
-
     class Meta:
         db_table = "provider"
         constraints = [UniqueConstraint(fields=["name"], name="provider_name_unique_index"), UniqueConstraint(fields=["client_id"], name="provider_client_id_unique_index")]

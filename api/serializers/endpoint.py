@@ -1,4 +1,3 @@
-from django.core.exceptions import BadRequest
 from rest_framework.fields import IntegerField
 from rest_framework.serializers import ModelSerializer
 from api.models import Endpoint, Parameter
@@ -6,75 +5,85 @@ from api.serializers.parameter import ParameterSerializer
 
 
 class EndpointSerializer(ModelSerializer):
-    id = IntegerField(allow_null=True)
-    parameters = ParameterSerializer(many=True)
+    id = IntegerField(required=False)
+    parameters = ParameterSerializer(allow_null=True, many=True)
 
     class Meta:
         model = Endpoint
-        fields = ["id", "type", "http_method", "base_url", "parameters"]
+        fields = ["id", "type", "base_url", "parameters"]
 
     def create(self, validated_data):
-        provider = validated_data["provider"]
+        provider = validated_data.get("provider")
         if provider is None:
-            raise BadRequest
+            return None
 
-        endpoint = Endpoint.objects.create(provider=provider,
-                                           type=validated_data["type"],
-                                           http_method=validated_data["http_method"],
-                                           base_url=validated_data["base_url"])
+        endpoint_type = validated_data.get("type")
+        base_url = validated_data.get("base_url")
 
-        parameter_data = validated_data["parameters"]
-        if parameter_data is None or len(parameter_data) == 0:
-            raise BadRequest
+        endpoint = Endpoint.objects.create(provider=provider, type=endpoint_type, base_url=base_url)
 
-        for parameter in parameter_data:
-            parameter_serializer = ParameterSerializer(data=parameter)
-            if parameter_serializer.is_valid():
+        parameters = validated_data.get("parameters")
+        if parameters is not None and len(parameters) != 0:
+            for parameter in parameters:
+                parameter_serializer = ParameterSerializer(data=parameter)
+                if not parameter_serializer.is_valid():
+                    return None
+
                 parameter_serializer.save(endpoint=endpoint)
-            else:
-                raise BadRequest
+
+                if parameter_serializer is None:
+                    return None
 
         return endpoint
 
     def update(self, instance, validated_data):
-        parameter_data = None
+        parameters = []
+        if validated_data.get("parameters") is not None:
+            parameters = validated_data.pop("parameters")
 
-        if "parameters" in validated_data:
-            parameter_data = validated_data.pop("parameters")
+        endpoint = super().update(instance=instance, validated_data=validated_data)
 
-        endpoint = super().update(instance, validated_data)
-
-        if parameter_data is not None and len(parameter_data) == 0:
-            raise BadRequest
-
-        if parameter_data is not None:
-            created_or_updated_parameter_ids = []
-
-            for parameter in parameter_data:
-                if parameter["id"] is None:
+        if len(parameters) != 0:
+            touched_parameters = []
+            for parameter in parameters:
+                parameter_id = parameter.get("id")
+                if parameter_id is None:
                     parameter_serializer = ParameterSerializer(data=parameter)
 
-                    if parameter_serializer.is_valid():
-                        parameter_serializer.save(endpoint=endpoint)
-                        created_or_updated_parameter_ids.append(parameter_serializer.data.get("id"))
-                    else:
-                        raise BadRequest
+                    if not parameter_serializer.is_valid():
+                        return None
+
+                    parameter_serializer.save(endpoint=endpoint)
+
+                    if parameter_serializer is None or parameter_serializer.data is None:
+                        return None
+
+                    touched_parameters.append(parameter_serializer.data.get("id"))
+
                 else:
+                    parameter_instance = None
                     try:
-                        found_parameter = Parameter.objects.get(pk=parameter["id"])
-                        parameter_serializer = ParameterSerializer(found_parameter, data=parameter, partial=True)
-
-                        if parameter_serializer.is_valid():
-                            parameter_serializer.save()
-                            created_or_updated_parameter_ids.append(parameter_serializer.data.get("id"))
-                        else:
-                            raise BadRequest
+                        parameter_instance = Parameter.objects.get(pk=parameter_id)
                     except Parameter.DoesNotExist:
-                        raise BadRequest
+                        return None
 
+                    parameter_serializer = ParameterSerializer(instance=parameter_instance, data=parameter, partial=True)
+
+                    if not parameter_serializer.is_valid():
+                        return None
+
+                    parameter_serializer.save()
+
+                    if parameter_serializer is None or parameter_serializer.data is None:
+                        return None
+
+                    touched_parameters.append(parameter_id)
+
+            # Remove parameters
             current_parameters = [parameter for parameter in instance.parameters.all()]
             for current_parameter in current_parameters:
-                if current_parameter.id not in created_or_updated_parameter_ids:
+                if current_parameter.id not in touched_parameters:
                     current_parameter.delete()
 
         return endpoint
+
