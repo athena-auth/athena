@@ -38,13 +38,11 @@ CSRF_COOKIE_SECURE = bool(os.getenv('CSRF_COOKIE_SECURE'))
 
 INSTALLED_APPS = [
     'api',
-    'django.contrib.sessions',
     'rest_framework'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

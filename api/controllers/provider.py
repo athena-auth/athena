@@ -5,13 +5,13 @@ from api.serializers.provider import ProviderSerializer
 
 class ProviderController:
 
-    def find_by_client_id(self, client_id):
-        if client_id is None:
+    def find_by_name(self, name):
+        if name is None:
             return None
 
         provider = None
         try:
-            provider = Provider.objects.get(client_id=client_id)
+            provider = Provider.objects.get(name__iexact=name)
         except Provider.DoesNotExist:
             return None
 
@@ -52,8 +52,8 @@ class ProviderController:
 
         return provider_serializer
 
-    def update_provider(self, client_id, request):
-        provider = self.find_by_client_id(client_id)
+    def update_provider(self, key, request):
+        provider = self.find_by_key(key)
 
         if provider is None:
             return None

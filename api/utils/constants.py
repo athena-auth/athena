@@ -1,0 +1,2 @@
+STATE_PARAM = "state"
+RESPONSE_TYPE_PARAM = "code"
