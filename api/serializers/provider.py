@@ -46,6 +46,7 @@ class ProviderSerializer(ModelSerializer):
         for endpoint in endpoints:
             endpoint_serializer = EndpointSerializer(data=endpoint)
             if not endpoint_serializer.is_valid():
+                print(endpoint_serializer.errors)
                 return None
 
             endpoint_serializer.save(provider=provider)
@@ -105,6 +106,7 @@ class ProviderSerializer(ModelSerializer):
                 endpoint_serializer = EndpointSerializer(data=endpoint)
 
                 if not endpoint_serializer.is_valid():
+                    print(endpoint_serializer.errors)
                     return None
 
                 endpoint_serializer.save(provider=provider)
@@ -134,9 +136,9 @@ class ProviderSerializer(ModelSerializer):
                 touched_endpoints.append(endpoint_id)
 
         # Remove endpoints
-        current_endpoints = [endpoint for endpoint in instance.endpoints.all()]
-        for current_endpoint in current_endpoints:
-            if current_endpoint.id not in touched_endpoints:
-                current_endpoint.delete()
+        # current_endpoints = [endpoint for endpoint in instance.endpoints.all()]
+        # for current_endpoint in current_endpoints:
+        #     if current_endpoint.id not in touched_endpoints:
+        #         current_endpoint.delete()
 
         return provider

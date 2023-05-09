@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from api.controllers.auth import AuthorizationController
 
 
-class AuthorizationView(APIView):
+class AuthenticationView(APIView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.controller = AuthorizationController()
@@ -19,4 +19,14 @@ class AuthorizationView(APIView):
             return Response(status=HTTP_400_BAD_REQUEST)
 
         return Response({"authorization_url": authorization_url}, status=HTTP_200_OK)
+
+    def post(self, request, name):
+        if name is None:
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        authentication_response = self.controller.authenticate_provider(request=request, provider_name=name)
+        if authentication_response is None:
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        return Response(authentication_response, status=HTTP_200_OK)
 

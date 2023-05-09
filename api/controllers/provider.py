@@ -60,6 +60,7 @@ class ProviderController:
 
         provider_serializer = ProviderSerializer(instance=provider, data=request.data, partial=True)
         if not provider_serializer.is_valid():
+            print(provider_serializer.errors)
             return None
 
         provider_serializer.save()

@@ -6,7 +6,7 @@ from api.serializers.parameter import ParameterSerializer
 
 class EndpointSerializer(ModelSerializer):
     id = IntegerField(required=False)
-    parameters = ParameterSerializer(allow_null=True, many=True)
+    parameters = ParameterSerializer(allow_null=True, many=True, required=False)
 
     class Meta:
         model = Endpoint
@@ -80,10 +80,10 @@ class EndpointSerializer(ModelSerializer):
                     touched_parameters.append(parameter_id)
 
             # Remove parameters
-            current_parameters = [parameter for parameter in instance.parameters.all()]
-            for current_parameter in current_parameters:
-                if current_parameter.id not in touched_parameters:
-                    current_parameter.delete()
+            # current_parameters = [parameter for parameter in instance.parameters.all()]
+            # for current_parameter in current_parameters:
+            #     if current_parameter.id not in touched_parameters:
+            #         current_parameter.delete()
 
         return endpoint
 

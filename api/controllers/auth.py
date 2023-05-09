@@ -2,7 +2,8 @@ from urllib.parse import urlencode
 
 from api.controllers.provider import ProviderController
 from api.models import Endpoint
-from api.utils.constants import STATE_PARAM, RESPONSE_TYPE_PARAM
+from api.utils.constants import STATE_PARAM, RESPONSE_TYPE_PARAM, ORIGIN_HEADER, GRANT_TYPE
+import requests
 
 
 class AuthorizationController:
@@ -21,9 +22,6 @@ class AuthorizationController:
 
         # Build the authorization url based on RFC6749 spec
         client_id = provider.client_id
-        if client_id is None:
-            return None
-
         redirect_uri = provider.redirect_uri
         scope = provider.scope
 
@@ -59,9 +57,44 @@ class AuthorizationController:
 
         return authorize_endpoint
 
-    def persist_session(self):
-        # TODO: create a new user session
-        # Such sessions are created once the user successfully has access to a protected resource
-        pass
+    def authenticate_provider(self, request, provider_name):
+        provider = self.provider_controller.find_by_name(provider_name)
+
+        if provider is None:
+            return None
+
+        redirect_uri = request.headers.get(ORIGIN_HEADER)
+        if redirect_uri is None:
+            return None
+
+        code = request.data.get("code")
+        if code is None:
+            return None
+
+        client_id = provider.client_id
+        client_secret = provider.client_secret
+
+        authenticate_endpoint = provider.endpoints.filter(type=Endpoint.EndpointType.TOKEN).first()
+        if authenticate_endpoint is None:
+            return None
+
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+
+        body = {
+            "grant_type": GRANT_TYPE,
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "redirect_uri": redirect_uri,
+            "code": code
+        }
+
+        authenticate_request = requests.post(authenticate_endpoint.base_url, data=body, headers=headers)
+
+        if authenticate_request.status_code != 200:
+            return None
+
+        return authenticate_request.json()
 
 
